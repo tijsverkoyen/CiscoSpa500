@@ -1,0 +1,22 @@
+{
+	"name": "tijsverkoyen/ciscospa500",
+	"type": "library",
+	"description": "PHP CiscoSpa500 is a (wrapper)class to communicate with your Cisco SPA 50x-phone.",
+	"homepage": "https://github.com/tijsverkoyen/CiscoSpa500",
+	"license": "BSD",
+	"authors": [
+		{
+			"name": "Tijs Verkoyen",
+			"email": "php-ciscospa500@verkoyen.eu",
+			"role": "Developer"
+		}
+	],
+	"require": {
+		"php": ">=5.2.0",
+		"ext-curl": "*"
+	},
+	"target-dir": "TijsVerkoyen/CiscoSpa500",
+	"autoload": {
+		"psr-0": {"TijsVerkoyen\\CiscoSpa500": ""}
+	}
+}
