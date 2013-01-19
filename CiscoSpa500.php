@@ -18,10 +18,10 @@ class CiscoSpa500
     // current version
     const VERSION = '1.0.0';
 
-	/**
-	 * @var The ip of the phone
-	 */
-	private $ip;
+    /**
+     * @var The ip of the phone
+     */
+    private $ip;
 
     /**
      * The timeout
@@ -46,7 +46,7 @@ class CiscoSpa500
      */
     public function __construct($ip)
     {
-	    $this->setIp($ip);
+        $this->setIp($ip);
     }
 
     /**
@@ -112,15 +112,15 @@ class CiscoSpa500
         return $response;
     }
 
-	/**
-	 * Get the ip
-	 *
-	 * @return string
-	 */
-	public function getIp()
-	{
-		return $this->ip;
-	}
+    /**
+     * Get the ip
+     *
+     * @return string
+     */
+    public function getIp()
+    {
+        return $this->ip;
+    }
 
     /**
      * Get the timeout that will be used
@@ -144,15 +144,15 @@ class CiscoSpa500
         return (string) 'PHP CiscoSpa500/' . self::VERSION . ' ' . $this->userAgent;
     }
 
-	/**
-	 * Set the ip of the phone
-	 *
-	 * @param string $ip
-	 */
-	public function setIp($ip)
-	{
-		$this->ip = (string) $ip;
-	}
+    /**
+     * Set the ip of the phone
+     *
+     * @param string $ip
+     */
+    public function setIp($ip)
+    {
+        $this->ip = (string) $ip;
+    }
 
     /**
      * Set the timeout
@@ -179,56 +179,82 @@ class CiscoSpa500
         $this->userAgent = (string) $userAgent;
     }
 
-	/**
-	 * Get the call log
-	 *
-	 * @return array
-	 */
-	public function getCallLog()
-	{
-		$data = $this->doCall('calllog.htm');
-		$return = array();
+    /**
+     * Get the call log
+     *
+     * @return array
+     */
+    public function getCallLog()
+    {
+        $data = $this->doCall('calllog.htm');
+        $return = array();
 
-		$tabs = array();
-		preg_match_all('|<div.*class="tab-page".*id="(.*)">.*<table.*class="stat".*>(.*)</div>|iUms', $data, $tabs);
+        $tabs = array();
+        preg_match_all('|<div.*class="tab-page".*id="(.*)">.*<table.*class="stat".*>(.*)</div>|iUms', $data, $tabs);
 
-		if(isset($tabs[1]))
-		{
-			// loop tabs
-			foreach($tabs[1] as $i => $row)
-			{
-				$return[$row] = array();
+        if (isset($tabs[1])) {
+            // loop tabs
+            foreach ($tabs[1] as $i => $row) {
+                $return[$row] = array();
 
-				$lines = array();
-				preg_match_all('|.*<td>&nbsp;(.*)(<td>)+|iUm', $tabs[2][$i], $lines);
+                $lines = array();
+                preg_match_all('|.*<td>&nbsp;(.*)(<td>)+|iUm', $tabs[2][$i], $lines);
 
-				if(isset($lines[1]))
-				{
-					foreach($lines[1] as $line)
-					{
-						if(trim($line) == '') continue;
-						$values = explode(',', $line);
+                if (isset($lines[1])) {
+                    foreach ($lines[1] as $line) {
+                        if (trim($line) == '') {
+                            continue;
+                        }
+                        $values = explode(',', $line);
 
-						if(count($values) < 4)
-						{
-							array_unshift($values, null);
-						}
+                        if (count($values) < 4) {
+                            array_unshift($values, null);
+                        }
 
-						$keys = array('from', 'to', 'time', 'duration');
+                        $keys = array('from', 'to', 'time', 'duration');
 
-						$values = array_combine($keys, $values);
+                        $values = array_combine($keys, $values);
 
-						foreach($values as $key => $value)
-						{
-							$values[$key] = trim($value);
-						}
+                        foreach ($values as $key => $value) {
+                            $values[$key] = trim($value);
+                        }
 
-						$return[$row][] = $values;
-					}
-				}
-			}
-		}
+                        $return[$row][] = $values;
+                    }
+                }
+            }
+        }
 
-		return $return;
-	}
+        return $return;
+    }
+
+    /**
+     * Update the personal directory
+     *
+     * @param array $items
+     */
+    public function updatePersonalDirectory(array $items)
+    {
+        // get the field names
+        $data = $this->doCall('pdir.htm');
+        $fields = array();
+        preg_match_all('|<input.*name="(.*)".*>|iUms', $data, $fields);
+
+        // init parameters
+        $parameters = array_fill_keys($fields[1], '');
+
+        // loop the items
+        foreach ($items as $i => $item) {
+            $chunks = array();
+
+            foreach ($item as $key => $value) {
+                $chunks[] = $key .'=' . $value;
+            }
+
+            $parameters[$fields[1][$i]] = implode(';', $chunks);
+        }
+
+        // do the post
+        $this->doCall('pdir.csc', $parameters, 'POST');
+    }
 }

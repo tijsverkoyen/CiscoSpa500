@@ -10,7 +10,13 @@ use \TijsVerkoyen\CiscoSpa500\CiscoSpa500;
 $cisco = new CiscoSpa500(IP);
 
 try {
-//	$response = $cisco->getCallLog();
+    $response = $cisco->getCallLog();
+    $response = $cisco->updatePersonalDirectory(
+        array(
+            array('n' => 'John Doe', 'p' => '01234567890'),
+            array('n' => 'Foo Bar', 'p' => '1234567890'),
+        )
+    );
 } catch (Exception $e) {
     var_dump($e);
 }
